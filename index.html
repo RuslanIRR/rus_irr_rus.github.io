@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>АвиаКальк - Расчёт безопасных высот полёта ВС</title>
+    
+    <!-- Подключение JQuery для ЛР №4 -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background: #eef2f5;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .block1 {
+            background: linear-gradient(135deg, #0b2b3b 0%, #1a4a6f 100%);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .nav-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        .logo {
+            color: #ffd966;
+            font-size: 1.7rem;
+            font-weight: bold;
+            background: rgba(255,255,255,0.1);
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+        }
+        .logo span {
+            color: white;
+            font-weight: normal;
+        }
+        .menu {
+            display: flex;
+            gap: 1.8rem;
+            flex-wrap: wrap;
+        }
+        .menu a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: 0.3s;
+            padding: 0.5rem 0;
+            border-bottom: 2px solid transparent;
+        }
+        .menu a:hover {
+            border-bottom-color: #ffd966;
+            color: #ffd966;
+        }
+
+        .hero-bg {
+            background: linear-gradient(112deg, #cfe3f0 0%, #e2edf4 100%);
+            padding: 2rem 0 1.5rem;
+        }
+        .block2 {
+            text-align: center;
+        }
+        .block2 h1 {
+            font-size: 2.2rem;
+            color: #0a2f44;
+            margin-bottom: 0.5rem;
+        }
+        .block2 p {
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0.8rem auto;
+            color: #1e4663;
+        }
+        .badge {
+            background: #0b2b3b;
+            color: #ffd966;
+            display: inline-block;
+            padding: 0.3rem 1rem;
+            border-radius: 30px;
+            font-weight: 500;
+        }
+
+        .section {
+            padding: 3rem 0;
+            border-bottom: 1px solid #cddfe7;
+        }
+        .section-title {
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #0b2b3b;
+            position: relative;
+        }
+        .section-title:after {
+            content: '';
+            display: block;
+            width: 70px;
+            height: 3px;
+            background: #ffa500;
+            margin: 0.5rem auto 0;
+        }
+
+        .block3-inner {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        .b3-left {
+            flex: 1.2;
+            background: #f8fafc;
+            padding: 1.8rem;
+            border-right: 1px solid #e2edf4;
+        }
+        .b3-left h3 {
+            font-size: 1.8rem;
+            color: #1a4a6f;
+            margin-bottom: 1rem;
+        }
+        .b3-left p {
+            color: #2c3e50;
+            line-height: 1.5;
+        }
+        .b3-right {
+            flex: 2.5;
+            padding: 1.8rem;
+            background: white;
+        }
+        .calc-selector {
+            margin-bottom: 1.8rem;
+        }
+        .calc-selector label {
+            font-weight: 600;
+            margin-right: 1rem;
+        }
+        select, input, button {
+            padding: 0.6rem 1rem;
+            border-radius: 12px;
+            border: 1px solid #bdd4e2;
+            font-size: 1rem;
+        }
+        .input-group {
+            margin-bottom: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .input-group label {
+            width: 220px;
+            font-weight: 500;
+        }
+        button {
+            background: #1a4a6f;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 0.5rem;
+            padding: 0.7rem 1.8rem;
+        }
+        button:hover {
+            background: #0e3a56;
+            transform: translateY(-2px);
+        }
+        .result-area {
+            margin-top: 1.8rem;
+            background: #eef3fc;
+            padding: 1rem 1.5rem;
+            border-radius: 20px;
+            border-left: 6px solid #ffa500;
+        }
+        .result-area h4 {
+            margin-bottom: 0.5rem;
+            color: #0b2b3b;
+        }
+        .result-value {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #c96f0e;
+        }
+
+        .advantages-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            justify-content: center;
+        }
+        .adv-card {
+            background: white;
+            border-radius: 24px;
+            padding: 1.5rem;
+            flex: 1;
+            min-width: 180px;
+            text-align: center;
+            box-shadow: 0 5px 12px rgba(0,0,0,0.05);
+            transition: 0.2s;
+        }
+        .adv-card:hover { transform: translateY(-5px);}
+        .adv-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .feedback-form {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 32px;
+            box-shadow: 0 12px 24px rgba(0,0,0,0.05);
+        }
+        .feedback-form input, .feedback-form textarea {
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        .block6-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            justify-content: space-between;
+        }
+        .info-col {
+            flex: 1;
+            background: #f9fbfd;
+            padding: 1.5rem;
+            border-radius: 24px;
+        }
+        .info-col h4 {
+            color: #1a4a6f;
+            margin-bottom: 1rem;
+            border-left: 4px solid #ffa500;
+            padding-left: 12px;
+        }
+        footer {
+            background: #0b2b3b;
+            color: white;
+            text-align: center;
+            padding: 1.2rem;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 760px) {
+            .menu { gap: 1rem; justify-content: center; margin-top: 0.5rem; }
+            .nav-container { flex-direction: column; }
+            .input-group label { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="block1">
+    <div class="container nav-container">
+        <div class="logo">✈ Авиа<span>КалькуляторНбез</span></div>
+        <div class="menu">
+            <a href="#about">О проекте</a>
+            <a href="#calc">Расчёты</a>
+            <a href="#benefits">Преимущества</a>
+            <a href="#feedback">Обратная связь</a>
+            <a href="#info">FAQ/Полезное</a>
+        </div>
+    </div>
+</div>
+
+<div class="hero-bg" id="about">
+    <div class="container block2">
+        <h1>📐 Безопасные высоты полёта ВС</h1>
+        <p>Профессиональный онлайн-калькулятор, реализующий методику расчёта безопасных высот согласно <strong>Приложению №2</strong> к Федеральным правилам использования воздушного пространства РФ (Постановление №138 от 11.03.2010).</p>
+        <div class="badge">✈ 11 видов расчётов | Для ПВП / ППИ | Государственная авиация</div>
+    </div>
+</div>
+
+<div class="container section" id="calc">
+    <div class="block3-inner">
+        <div class="b3-left">
+            <h3>⚙️ Возможности</h3>
+            <p>Выберите тип расчёта из 11 пунктов Федеральных правил. Калькулятор автоматически подставит необходимые поля, выполнит вычисления с учётом температурных поправок, барометрических ступеней и округлений.</p>
+            <p style="margin-top: 1rem;">📌 Результаты можно использовать для учебных и предварительных расчётов.</p>
+        </div>
+        <div class="b3-right">
+            <div class="calc-selector">
+                <label>📋 Пункт расчета: </label>
+                <select id="calcTypeSelect">
+                    <option value="1">1. Н МБВК QFE</option>
+                    <option value="2">2. Н МБВК QNH</option>
+                    <option value="3">3. Н МБВра QFE</option>
+                    <option value="4">4. Н МБВра QNH</option>
+                    <option value="5">5. Высота перехода</option>
+                    <option value="6">6. H БН QNH</option>
+                    <option value="7">7. H НЭ QNE (Нижний эшелон)</option>
+                    <option value="8">8. Эшелон перехода аэродрома</option>
+                    <option value="9">9. H перех ЕС ОрВД</option>
+                    <option value="10">10. H эш перехода ЕС</option>
+                    <option value="11">11. H змин</option>
+                </select>
+            </div>
+            <div id="dynamicInputs"></div>
+            <button id="calcBtn">🧮 Рассчитать безопасную высоту</button>
+            <div id="resultBlock" class="result-area" style="display: none;">
+                <h4>📌 Результат расчёта:</h4>
+                <div id="resultText" class="result-value">—</div>
+                <div id="resultNote" style="font-size: 0.85rem; margin-top: 0.5rem; color: #2c5282;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container section" id="benefits">
+    <h2 class="section-title">Преимущества авиационного калькулятора</h2>
+    <div class="advantages-grid">
+        <div class="adv-card"><div class="adv-icon">📜</div><h3>Нормативная база</h3><p>Расчёт по ПП РФ №138, Приложение №2.</p></div>
+        <div class="adv-card"><div class="adv-icon">🌡️</div><h3>Температурная коррекция</h3><p>Автоматический учёт ∆Ht.</p></div>
+        <div class="adv-card"><div class="adv-icon">⛰️</div><h3>Тип местности</h3><p>Выбор запаса высоты (300 / 600 м).</p></div>
+        <div class="adv-card"><div class="adv-icon">🎯</div><h3>Округление</h3><p>Кратность 50 м, эшелоны 150 м.</p></div>
+    </div>
+</div>
+
+<div class="container section" id="feedback">
+    <h2 class="section-title">📬 Обратная связь</h2>
+    <div class="feedback-form">
+        <input type="text" id="fbName" placeholder="Ваше имя" value="Штурман Иванов">
+        <input type="email" id="fbEmail" placeholder="Email" value="pilot@avia.ru">
+        <textarea rows="3" id="fbMsg" placeholder="Ваше сообщение...">Подскажите, как учесть горный рельеф в п.3?</textarea>
+        <button id="sendFeedbackBtn">✈ Отправить сообщение</button>
+    </div>
+</div>
+
+<div class="container section" id="info">
+    <h2 class="section-title">Полезная информация & Контакты</h2>
+    <div class="block6-grid">
+        <div class="info-col">
+            <h4>📘 Способы обучения</h4>
+            <p>Онлайн-тренажёры, штурманские расчёты, ФП ИВП-138, ФАП ШС-150.</p>
+        </div>
+        <div class="info-col">
+            <h4>📎 Справочно</h4>
+            <p>• QNE = 760 мм рт.ст. (1013,2 гПа)<br>• QFE — давление на уровне аэродрома<br>• QNH — давление, приведённое к уровню моря<br>• Эшелоны кратные 150 м</p>
+        </div>
+        <div class="info-col">
+            <h4>📞 Контакты</h4>
+            <p>✉ rus_irr_lan@mail.ru<br>📞 +7 (999) 651-03-47</p>
+        </div>
+    </div>
+</div>
+
+<footer>
+    © 2026 Лабораторная работа №4 — «Расчёт безопасных высот полёта ВС». JQuery + JavaScript.
+</footer>
+
+<script>
+    // ========== ОБЩИЕ УТИЛИТЫ ==========
+    function roundUpTo(value, multiple) {
+        if (multiple <= 0) return value;
+        return Math.ceil(value / multiple) * multiple;
+    }
+    
+    function computeDeltaHt(H, t_aer, H_aer) {
+        const L0 = 0.0065;
+        const t0 = t_aer + L0 * H_aer;
+        const denominator = 273 + t0 - 0.5 * L0 * (H + H_aer);
+        if (denominator === 0) return 0;
+        return H * ((15 - t0) / denominator);
+    }
+    
+    function roundToFlightLevelUp(value_m) {
+        return Math.ceil(value_m / 150) * 150;
+    }
+
+    // ========== КОНФИГУРАЦИИ ДЛЯ 11 ПУНКТОВ ==========
+    const configs = {
+        1: {
+            fields: [
+                {label: "∆H преп (отн. высота, м)", id: "dh", default: 85},
+                {label: "МЗВ", id: "mzv_type", type: "select", options: ["ПВП (100 м)", "ППП (200 м)"], default: "ПВП (100 м)"},
+                {label: "t аэр (°C)", id: "t_aer", default: -15},
+                {label: "H аэр (м)", id: "H_aer", default: 120}
+            ],
+            calc: (v) => {
+                let dh = +v.dh, mzv = v.mzv_type === "ПВП (100 м)" ? 100 : 200;
+                let H_base = dh + mzv;
+                let delta = computeDeltaHt(H_base, +v.t_aer, +v.H_aer);
+                return { value: roundUpTo(H_base + delta, 50), note: "Округлено до 50 м" };
+            }
+        },
+        2: {
+            fields: [
+                {label: "H преп (абс. высота, м)", id: "h_abs", default: 210},
+                {label: "МЗВ", id: "mzv_type", type: "select", options: ["ПВП (100 м)", "ППП (200 м)"], default: "ППП (200 м)"},
+                {label: "t аэр (°C)", id: "t_aer", default: -10},
+                {label: "H аэр (м)", id: "H_aer", default: 120}
+            ],
+            calc: (v) => {
+                let Hprep = +v.h_abs, mzv = v.mzv_type === "ПВП (100 м)" ? 100 : 200;
+                let H_base = Hprep + mzv;
+                let delta = computeDeltaHt(H_base, +v.t_aer, +v.H_aer);
+                return { value: roundUpTo(H_base + delta, 50), note: "Абсолютная высота" };
+            }
+        },
+        3: {
+            fields: [
+                {label: "∆H преп (отн. высота, м)", id: "dh", default: 150},
+                {label: "Местность", id: "terrain", type: "select", options: ["Равнина (300 м)", "Горы (600 м)"], default: "Равнина (300 м)"},
+                {label: "t аэр (°C)", id: "t_aer", default: -5},
+                {label: "H аэр (м)", id: "H_aer", default: 100}
+            ],
+            calc: (v) => {
+                let dh = +v.dh, mzv = v.terrain === "Горы (600 м)" ? 600 : 300;
+                let H_base = dh + mzv;
+                let delta = computeDeltaHt(H_base, +v.t_aer, +v.H_aer);
+                return { value: roundUpTo(H_base + delta, 50), note: "С учётом местности" };
+            }
+        },
+        4: {
+            fields: [
+                {label: "H преп (абс. высота, м)", id: "h_abs", default: 350},
+                {label: "Местность", id: "terrain", type: "select", options: ["Равнина (300 м)", "Горы (600 м)"], default: "Равнина (300 м)"},
+                {label: "t аэр (°C)", id: "t_aer", default: -8},
+                {label: "H аэр (м)", id: "H_aer", default: 140}
+            ],
+            calc: (v) => {
+                let h_abs = +v.h_abs, mzv = v.terrain === "Горы (600 м)" ? 600 : 300;
+                let H_base = h_abs + mzv;
+                let delta = computeDeltaHt(H_base, +v.t_aer, +v.H_aer);
+                return { value: roundUpTo(H_base + delta, 50), note: "Абсолютная безопасная" };
+            }
+        },
+        5: {
+            fields: [{label: "Макс. безопасная высота (м)", id: "max_safe", default: 450}],
+            calc: (v) => ({ value: roundUpTo(+v.max_safe, 50), note: "Высота перехода" })
+        },
+        6: {
+            fields: [
+                {label: "H преп (м)", id: "h_prep", default: 500},
+                {label: "Местность", id: "terrain", type: "select", options: ["Равнина (300 м)", "Горы (600 м)"], default: "Равнина (300 м)"},
+                {label: "t3 (°C)", id: "t3", default: -12}
+            ],
+            calc: (v) => {
+                let base = +v.h_prep + (v.terrain === "Горы (600 м)" ? 600 : 300);
+                let res = base * (285 / (273 + +v.t3));
+                return { value: Math.round(res * 10) / 10, note: "С температурной поправкой" };
+            }
+        },
+        7: {
+            fields: [
+                {label: "H преп (м)", id: "h_prep", default: 620},
+                {label: "QNH (гПа)", id: "qnh", default: 990},
+                {label: "t3 (°C)", id: "t3", default: -15}
+            ],
+            calc: (v) => {
+                let deltaHbar = (1013.2 - +v.qnh) * 8.3;
+                let base = +v.h_prep + 600 + deltaHbar;
+                let res = base * (285 / (273 + +v.t3));
+                return { value: roundToFlightLevelUp(res), note: "Нижний эшелон" };
+            }
+        },
+        8: {
+            fields: [
+                {label: "H перех QFE (м)", id: "h_qfe", default: 500},
+                {label: "H аэр (м)", id: "h_aer", default: 120}
+            ],
+            calc: (v) => ({ value: roundToFlightLevelUp(+v.h_qfe + 300 + +v.h_aer), note: "Эшелон перехода QFE" })
+        },
+        9: {
+            fields: [
+                {label: "H преп (м)", id: "h_prep", default: 850},
+                {label: "t3 (°C)", id: "t3", default: -20}
+            ],
+            calc: (v) => ({ value: Math.round((+v.h_prep + 600) * (285 / (273 + +v.t3)) * 10) / 10, note: "Высота перехода ЕС" })
+        },
+        10: {
+            fields: [{label: "Высота перехода (м)", id: "h_trans", default: 1250}],
+            calc: (v) => ({ value: roundToFlightLevelUp(+v.h_trans + 300), note: "Эшелон перехода ЕС" })
+        },
+        11: {
+            fields: [
+                {label: "H рел (м)", id: "h_rel", default: 420},
+                {label: "Местность", id: "terrain", type: "select", options: ["Равнина (300 м)", "Горы (600 м)"], default: "Равнина (300 м)"}
+            ],
+            calc: (v) => ({ value: +v.h_rel + (v.terrain === "Горы (600 м)" ? 600 : 300), note: "Мин. высота в зоне" })
+        }
+    };
+
+    // ========== ФУНКЦИИ НА JQUERY ==========
+    function renderInputsJQ(calcId) {
+        const cfg = configs[calcId];
+        if (!cfg) return;
+        const $container = $("#dynamicInputs");
+        $container.empty();
+        
+        $.each(cfg.fields, function(i, f) {
+            const $div = $("<div>").addClass("input-group");
+            const $label = $("<label>").text(f.label);
+            let $input;
+            if (f.type === "select") {
+                $input = $("<select>");
+                $.each(f.options, function(j, opt) {
+                    const $opt = $("<option>").val(opt).text(opt);
+                    if (opt === f.default) $opt.prop("selected", true);
+                    $input.append($opt);
+                });
+            } else {
+                $input = $("<input>").attr("type", "number").attr("step", "any").val(f.default);
+            }
+            $input.attr("id", `inp_${f.id}`);
+            $div.append($label, $input);
+            $container.append($div);
+        });
+    }
+
+    function collectValuesJQ(calcId) {
+        const cfg = configs[calcId];
+        let values = {};
+        $.each(cfg.fields, function(i, f) {
+            const $el = $(`#inp_${f.id}`);
+            if ($el.length) values[f.id] = $el.val();
+        });
+        return values;
+    }
+
+    // ========== ОБРАБОТЧИКИ JQUERY ==========
+    $(document).ready(function() {
+        $("#calcTypeSelect").on("change", function() {
+            renderInputsJQ(parseInt($(this).val()));
+            $("#resultBlock").hide();
+        });
+        
+        $("#calcBtn").on("click", function() {
+            const id = parseInt($("#calcTypeSelect").val());
+            try {
+                const res = configs[id].calc(collectValuesJQ(id));
+                $("#resultBlock").show();
+                let unitText = (id === 7 || id === 8 || id === 10) ? " (эшелон)" : "";
+                $("#resultText").html(`${res.value.toFixed(1)} м${unitText}`);
+                $("#resultNote").html(res.note);
+            } catch(e) {
+                $("#resultBlock").show();
+                $("#resultText").html("Ошибка");
+                $("#resultNote").html("Проверьте ввод");
+            }
+        });
+        
+        $("#sendFeedbackBtn").on("click", function() {
+            const name = $("#fbName").val().trim();
+            const email = $("#fbEmail").val().trim();
+            const msg = $("#fbMsg").val().trim();
+            if (!name || !email || !msg) {
+                alert("⚠ Заполните все поля");
+            } else if (!email.includes("@") || !email.includes(".")) {
+                alert("⚠ Введите корректный email");
+            } else {
+                alert(`✈ Спасибо, ${name}! Сообщение отправлено на ${email}`);
+            }
+        });
+        
+        $(".menu a").on("click", function(e) {
+            e.preventDefault();
+            const target = $(this).attr("href");
+            if (target && target !== "#") {
+                $("html, body").animate({ scrollTop: $(target).offset().top }, 500);
+            }
+        });
+        
+        renderInputsJQ(1);
+    });
+</script>
+</body>
+</html>
